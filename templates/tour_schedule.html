@@ -1,0 +1,532 @@
+Add tour_schedule template
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    /* ---------- Global & Watermark ---------- */
+    @page {
+      size: Letter;
+      margin: 0;
+      background: url("data:image/png;base64,{{ logo_b64 }}") center center no-repeat;
+      background-size: 60%;
+      @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #777;
+      }
+    }
+    body { font-family: "Helvetica", sans-serif; margin: 0; }
+
+    /* ---------- Cover ---------- */
+    .cover { position: relative; width: 100%; height: 100vh; }
+    .cover img.hero { width: 100%; height: 100%; object-fit: cover; }
+    .cover .box {
+        position: absolute; bottom: 15%; right: 5%;
+        width: 300px; background: white; padding: 20px;
+        border: 1px solid #ddd;
+    }
+    .cover .logo { width: 120px; margin-top: 10px; }
+    h1 { margin: 0 0 5px 0; font-size: 26pt; }
+    h2 { margin: 0 0 5px 0; font-size: 18pt; }
+
+    /* ---------- TOC ---------- */
+    .toc { padding: 60px; }
+    .toc ol { line-height: 1.5; }
+
+    /* ---------- Schedule ---------- */
+    .schedule { padding: 40px 60px; }
+    .row { display: flex; gap: 20px; }
+    .col { flex: 1; }
+    .stop { margin-bottom: 25px; }
+    .stop h3 { margin: 0 0 4px 0; font-size: 12pt; }
+    .stop img.photo { width: 150px; height: 100px; object-fit: cover; border: 1px solid #ccc; }
+    .stop img.qr    { width: 80px;  height: 80px;  }
+    .stop img.fp    { width: 100%; height: 200px; object-fit: contain; border: 1px solid #ccc; margin-top: 6px; }
+
+    .map { width: 100%; height: 500px; margin-top: 20px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<!-- ---------- Cover Page ---------- -->
+<div class="cover">
+  <img class="hero" src="{{ tour.hero_image }}" alt="Hero">
+  <div class="box">
+    <h1>Tourbook</h1>
+    <p>Prepared exclusively for<br><strong>{{ tour.client_name }}</strong></p>
+    <img class="logo" src="{{ tour.logo }}" alt="Logo">
+    <hr>
+    <p><strong>Date of Tour</strong><br>{{ tour.date }}</p>
+    <p><strong>Start Time</strong><br>{{ tour.start_time }}</p>
+  </div>
+</div>
+<pagebreak />
+
+<!-- ---------- Table of Contents ---------- -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    {% for idx, s in enumerate(tour.stops, start=1) %}
+      <li>{{ s.address }} — Page {{ idx + 2 }}</li>
+    {% endfor %}
+  </ol>
+</div>
+<pagebreak />
+
+<!-- ---------- Schedule Page ---------- -->
+<div class="schedule">
+  <h2 class="bookmark">Tour Schedule</h2>
+  <div class="row">
+    <!-- Left column: all stops -->
+    <div class="col">
+      {% for s in tour.stops %}
+        <div class="stop">
+          <h3 class="bookmark">{{ s.address }}</h3>
+          <div style="display:flex; gap:10px;">
+            <img class="photo" src="{{ s.image_url }}" alt="Photo">
+            <div style="flex:1;">
+              <p><strong>{{ s.time }}</strong><br>{{ s.address }}<br>{{ s.floor }}</p>
+            </div>
+            <img class="qr" src="data:image/png;base64,{{ s.qr_b64 }}" alt="QR">
+          </div>
+          {% if s.floorplan_url %}
+            <img class="fp" src="{{ s.floorplan_url }}" alt="Floorplan">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right column: static map -->
+    <div class="col">
+      <img class="map" src="data:image/png;base64,{{ map_b64 }}" alt="Map">
+    </div>
+  </div>
+</div>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    /* ---------- Global & Watermark ---------- */
+    @page {
+      size: Letter;
+      margin: 0;
+      background: url("data:image/png;base64,{{ logo_b64 }}") center center no-repeat;
+      background-size: 60%;
+      @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #777;
+      }
+    }
+    body { font-family: "Helvetica", sans-serif; margin: 0; }
+
+    /* ---------- Cover ---------- */
+    .cover { position: relative; width: 100%; height: 100vh; }
+    .cover img.hero { width: 100%; height: 100%; object-fit: cover; }
+    .cover .box {
+        position: absolute; bottom: 15%; right: 5%;
+        width: 300px; background: white; padding: 20px;
+        border: 1px solid #ddd;
+    }
+    .cover .logo { width: 120px; margin-top: 10px; }
+    h1 { margin: 0 0 5px 0; font-size: 26pt; }
+    h2 { margin: 0 0 5px 0; font-size: 18pt; }
+
+    /* ---------- TOC ---------- */
+    .toc { padding: 60px; }
+    .toc ol { line-height: 1.5; }
+
+    /* ---------- Schedule ---------- */
+    .schedule { padding: 40px 60px; }
+    .row { display: flex; gap: 20px; }
+    .col { flex: 1; }
+    .stop { margin-bottom: 25px; }
+    .stop h3 { margin: 0 0 4px 0; font-size: 12pt; }
+    .stop img.photo { width: 150px; height: 100px; object-fit: cover; border: 1px solid #ccc; }
+    .stop img.qr    { width: 80px;  height: 80px;  }
+    .stop img.fp    { width: 100%; height: 200px; object-fit: contain; border: 1px solid #ccc; margin-top: 6px; }
+
+    .map { width: 100%; height: 500px; margin-top: 20px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<!-- ---------- Cover Page ---------- -->
+<div class="cover">
+  <img class="hero" src="{{ tour.hero_image }}" alt="Hero">
+  <div class="box">
+    <h1>Tourbook</h1>
+    <p>Prepared exclusively for<br><strong>{{ tour.client_name }}</strong></p>
+    <img class="logo" src="{{ tour.logo }}" alt="Logo">
+    <hr>
+    <p><strong>Date of Tour</strong><br>{{ tour.date }}</p>
+    <p><strong>Start Time</strong><br>{{ tour.start_time }}</p>
+  </div>
+</div>
+<pagebreak />
+
+<!-- ---------- Table of Contents ---------- -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    {% for idx, s in enumerate(tour.stops, start=1) %}
+      <li>{{ s.address }} — Page {{ idx + 2 }}</li>
+    {% endfor %}
+  </ol>
+</div>
+<pagebreak />
+
+<!-- ---------- Schedule Page ---------- -->
+<div class="schedule">
+  <h2 class="bookmark">Tour Schedule</h2>
+  <div class="row">
+    <!-- Left column: all stops -->
+    <div class="col">
+      {% for s in tour.stops %}
+        <div class="stop">
+          <h3 class="bookmark">{{ s.address }}</h3>
+          <div style="display:flex; gap:10px;">
+            <img class="photo" src="{{ s.image_url }}" alt="Photo">
+            <div style="flex:1;">
+              <p><strong>{{ s.time }}</strong><br>{{ s.address }}<br>{{ s.floor }}</p>
+            </div>
+            <img class="qr" src="data:image/png;base64,{{ s.qr_b64 }}" alt="QR">
+          </div>
+          {% if s.floorplan_url %}
+            <img class="fp" src="{{ s.floorplan_url }}" alt="Floorplan">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right column: static map -->
+    <div class="col">
+      <img class="map" src="data:image/png;base64,{{ map_b64 }}" alt="Map">
+    </div>
+  </div>
+</div>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    /* ---------- Global & Watermark ---------- */
+    @page {
+      size: Letter;
+      margin: 0;
+      background: url("data:image/png;base64,{{ logo_b64 }}") center center no-repeat;
+      background-size: 60%;
+      @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #777;
+      }
+    }
+    body { font-family: "Helvetica", sans-serif; margin: 0; }
+
+    /* ---------- Cover ---------- */
+    .cover { position: relative; width: 100%; height: 100vh; }
+    .cover img.hero { width: 100%; height: 100%; object-fit: cover; }
+    .cover .box {
+        position: absolute; bottom: 15%; right: 5%;
+        width: 300px; background: white; padding: 20px;
+        border: 1px solid #ddd;
+    }
+    .cover .logo { width: 120px; margin-top: 10px; }
+    h1 { margin: 0 0 5px 0; font-size: 26pt; }
+    h2 { margin: 0 0 5px 0; font-size: 18pt; }
+
+    /* ---------- TOC ---------- */
+    .toc { padding: 60px; }
+    .toc ol { line-height: 1.5; }
+
+    /* ---------- Schedule ---------- */
+    .schedule { padding: 40px 60px; }
+    .row { display: flex; gap: 20px; }
+    .col { flex: 1; }
+    .stop { margin-bottom: 25px; }
+    .stop h3 { margin: 0 0 4px 0; font-size: 12pt; }
+    .stop img.photo { width: 150px; height: 100px; object-fit: cover; border: 1px solid #ccc; }
+    .stop img.qr    { width: 80px;  height: 80px;  }
+    .stop img.fp    { width: 100%; height: 200px; object-fit: contain; border: 1px solid #ccc; margin-top: 6px; }
+
+    .map { width: 100%; height: 500px; margin-top: 20px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<!-- ---------- Cover Page ---------- -->
+<div class="cover">
+  <img class="hero" src="{{ tour.hero_image }}" alt="Hero">
+  <div class="box">
+    <h1>Tourbook</h1>
+    <p>Prepared exclusively for<br><strong>{{ tour.client_name }}</strong></p>
+    <img class="logo" src="{{ tour.logo }}" alt="Logo">
+    <hr>
+    <p><strong>Date of Tour</strong><br>{{ tour.date }}</p>
+    <p><strong>Start Time</strong><br>{{ tour.start_time }}</p>
+  </div>
+</div>
+<pagebreak />
+
+<!-- ---------- Table of Contents ---------- -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    {% for idx, s in enumerate(tour.stops, start=1) %}
+      <li>{{ s.address }} — Page {{ idx + 2 }}</li>
+    {% endfor %}
+  </ol>
+</div>
+<pagebreak />
+
+<!-- ---------- Schedule Page ---------- -->
+<div class="schedule">
+  <h2 class="bookmark">Tour Schedule</h2>
+  <div class="row">
+    <!-- Left column: all stops -->
+    <div class="col">
+      {% for s in tour.stops %}
+        <div class="stop">
+          <h3 class="bookmark">{{ s.address }}</h3>
+          <div style="display:flex; gap:10px;">
+            <img class="photo" src="{{ s.image_url }}" alt="Photo">
+            <div style="flex:1;">
+              <p><strong>{{ s.time }}</strong><br>{{ s.address }}<br>{{ s.floor }}</p>
+            </div>
+            <img class="qr" src="data:image/png;base64,{{ s.qr_b64 }}" alt="QR">
+          </div>
+          {% if s.floorplan_url %}
+            <img class="fp" src="{{ s.floorplan_url }}" alt="Floorplan">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right column: static map -->
+    <div class="col">
+      <img class="map" src="data:image/png;base64,{{ map_b64 }}" alt="Map">
+    </div>
+  </div>
+</div>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    /* ---------- Global & Watermark ---------- */
+    @page {
+      size: Letter;
+      margin: 0;
+      background: url("data:image/png;base64,{{ logo_b64 }}") center center no-repeat;
+      background-size: 60%;
+      @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #777;
+      }
+    }
+    body { font-family: "Helvetica", sans-serif; margin: 0; }
+
+    /* ---------- Cover ---------- */
+    .cover { position: relative; width: 100%; height: 100vh; }
+    .cover img.hero { width: 100%; height: 100%; object-fit: cover; }
+    .cover .box {
+        position: absolute; bottom: 15%; right: 5%;
+        width: 300px; background: white; padding: 20px;
+        border: 1px solid #ddd;
+    }
+    .cover .logo { width: 120px; margin-top: 10px; }
+    h1 { margin: 0 0 5px 0; font-size: 26pt; }
+    h2 { margin: 0 0 5px 0; font-size: 18pt; }
+
+    /* ---------- TOC ---------- */
+    .toc { padding: 60px; }
+    .toc ol { line-height: 1.5; }
+
+    /* ---------- Schedule ---------- */
+    .schedule { padding: 40px 60px; }
+    .row { display: flex; gap: 20px; }
+    .col { flex: 1; }
+    .stop { margin-bottom: 25px; }
+    .stop h3 { margin: 0 0 4px 0; font-size: 12pt; }
+    .stop img.photo { width: 150px; height: 100px; object-fit: cover; border: 1px solid #ccc; }
+    .stop img.qr    { width: 80px;  height: 80px;  }
+    .stop img.fp    { width: 100%; height: 200px; object-fit: contain; border: 1px solid #ccc; margin-top: 6px; }
+
+    .map { width: 100%; height: 500px; margin-top: 20px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<!-- ---------- Cover Page ---------- -->
+<div class="cover">
+  <img class="hero" src="{{ tour.hero_image }}" alt="Hero">
+  <div class="box">
+    <h1>Tourbook</h1>
+    <p>Prepared exclusively for<br><strong>{{ tour.client_name }}</strong></p>
+    <img class="logo" src="{{ tour.logo }}" alt="Logo">
+    <hr>
+    <p><strong>Date of Tour</strong><br>{{ tour.date }}</p>
+    <p><strong>Start Time</strong><br>{{ tour.start_time }}</p>
+  </div>
+</div>
+<pagebreak />
+
+<!-- ---------- Table of Contents ---------- -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    {% for idx, s in enumerate(tour.stops, start=1) %}
+      <li>{{ s.address }} — Page {{ idx + 2 }}</li>
+    {% endfor %}
+  </ol>
+</div>
+<pagebreak />
+
+<!-- ---------- Schedule Page ---------- -->
+<div class="schedule">
+  <h2 class="bookmark">Tour Schedule</h2>
+  <div class="row">
+    <!-- Left column: all stops -->
+    <div class="col">
+      {% for s in tour.stops %}
+        <div class="stop">
+          <h3 class="bookmark">{{ s.address }}</h3>
+          <div style="display:flex; gap:10px;">
+            <img class="photo" src="{{ s.image_url }}" alt="Photo">
+            <div style="flex:1;">
+              <p><strong>{{ s.time }}</strong><br>{{ s.address }}<br>{{ s.floor }}</p>
+            </div>
+            <img class="qr" src="data:image/png;base64,{{ s.qr_b64 }}" alt="QR">
+          </div>
+          {% if s.floorplan_url %}
+            <img class="fp" src="{{ s.floorplan_url }}" alt="Floorplan">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right column: static map -->
+    <div class="col">
+      <img class="map" src="data:image/png;base64,{{ map_b64 }}" alt="Map">
+    </div>
+  </div>
+</div>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    /* ---------- Global & Watermark ---------- */
+    @page {
+      size: Letter;
+      margin: 0;
+      background: url("data:image/png;base64,{{ logo_b64 }}") center center no-repeat;
+      background-size: 60%;
+      @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #777;
+      }
+    }
+    body { font-family: "Helvetica", sans-serif; margin: 0; }
+
+    /* ---------- Cover ---------- */
+    .cover { position: relative; width: 100%; height: 100vh; }
+    .cover img.hero { width: 100%; height: 100%; object-fit: cover; }
+    .cover .box {
+        position: absolute; bottom: 15%; right: 5%;
+        width: 300px; background: white; padding: 20px;
+        border: 1px solid #ddd;
+    }
+    .cover .logo { width: 120px; margin-top: 10px; }
+    h1 { margin: 0 0 5px 0; font-size: 26pt; }
+    h2 { margin: 0 0 5px 0; font-size: 18pt; }
+
+    /* ---------- TOC ---------- */
+    .toc { padding: 60px; }
+    .toc ol { line-height: 1.5; }
+
+    /* ---------- Schedule ---------- */
+    .schedule { padding: 40px 60px; }
+    .row { display: flex; gap: 20px; }
+    .col { flex: 1; }
+    .stop { margin-bottom: 25px; }
+    .stop h3 { margin: 0 0 4px 0; font-size: 12pt; }
+    .stop img.photo { width: 150px; height: 100px; object-fit: cover; border: 1px solid #ccc; }
+    .stop img.qr    { width: 80px;  height: 80px;  }
+    .stop img.fp    { width: 100%; height: 200px; object-fit: contain; border: 1px solid #ccc; margin-top: 6px; }
+
+    .map { width: 100%; height: 500px; margin-top: 20px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<!-- ---------- Cover Page ---------- -->
+<div class="cover">
+  <img class="hero" src="{{ tour.hero_image }}" alt="Hero">
+  <div class="box">
+    <h1>Tourbook</h1>
+    <p>Prepared exclusively for<br><strong>{{ tour.client_name }}</strong></p>
+    <img class="logo" src="{{ tour.logo }}" alt="Logo">
+    <hr>
+    <p><strong>Date of Tour</strong><br>{{ tour.date }}</p>
+    <p><strong>Start Time</strong><br>{{ tour.start_time }}</p>
+  </div>
+</div>
+<pagebreak />
+
+<!-- ---------- Table of Contents ---------- -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    {% for idx, s in enumerate(tour.stops, start=1) %}
+      <li>{{ s.address }} — Page {{ idx + 2 }}</li>
+    {% endfor %}
+  </ol>
+</div>
+<pagebreak />
+
+<!-- ---------- Schedule Page ---------- -->
+<div class="schedule">
+  <h2 class="bookmark">Tour Schedule</h2>
+  <div class="row">
+    <!-- Left column: all stops -->
+    <div class="col">
+      {% for s in tour.stops %}
+        <div class="stop">
+          <h3 class="bookmark">{{ s.address }}</h3>
+          <div style="display:flex; gap:10px;">
+            <img class="photo" src="{{ s.image_url }}" alt="Photo">
+            <div style="flex:1;">
+              <p><strong>{{ s.time }}</strong><br>{{ s.address }}<br>{{ s.floor }}</p>
+            </div>
+            <img class="qr" src="data:image/png;base64,{{ s.qr_b64 }}" alt="QR">
+          </div>
+          {% if s.floorplan_url %}
+            <img class="fp" src="{{ s.floorplan_url }}" alt="Floorplan">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right column: static map -->
+    <div class="col">
+      <img class="map" src="data:image/png;base64,{{ map_b64 }}" alt="Map">
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
